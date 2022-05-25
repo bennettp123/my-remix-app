@@ -9,7 +9,7 @@ import { deleteTodo } from '~/models/todo.server'
 import { getTodo } from '~/models/todo.server'
 import { requireUserId } from '~/session.server'
 
-type LoaderData = {
+export type LoaderData = {
     todo: Todo
 }
 

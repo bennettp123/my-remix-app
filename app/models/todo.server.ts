@@ -66,11 +66,21 @@ export async function createTodo({
     description,
     isComplete,
 }: Pick<Todo, "userId" | "title" | "description" | "isComplete">): Promise<Todo> {
+    return upsertTodo({ id: cuid(), userId, title, description, isComplete })
+}
+
+export async function upsertTodo({
+    id,
+    userId,
+    title,
+    description,
+    isComplete,
+}: Pick<Todo, "id" | "userId" | "title" | "description" | "isComplete">): Promise<Todo> {
     const db = await arc.tables()
   
     const result = await db.app.put({
         pk: userId,
-        sk: idToSk(cuid()),
+        sk: idToSk(id),
         title,
         description,
         isComplete,
@@ -85,33 +95,19 @@ export async function createTodo({
     };
 }
 
+
 export async function setTodoCompletion({
     id,
     userId,
     isComplete,
 }: Pick<Todo, 'id' | 'userId' | 'isComplete'>): Promise<Todo | null> {
-    const db = await arc.tables()
     const todo = await getTodo({id, userId})
 
     if (!todo) {
-        return null
+        throw new Error('todo not found!')
     }
 
-    const result = await db.app.update({
-        pk: userId,
-        sk: idToSk(id),
-        title: todo.title,
-        description: todo.description,
-        isComplete,
-    })
-
-    return {
-        id: skToId(result.sk),
-        userId: result.pk,
-        title: result.title,
-        description: result.description,
-        isComplete: result.isComplete,
-    }
+    return upsertTodo({...todo, isComplete})
 }
 
 export async function deleteTodo({ id, userId }: Pick<Todo, "id" | "userId">) {
