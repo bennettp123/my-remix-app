@@ -12,6 +12,7 @@ region ap-southeast-2
 @static
 
 @tables
+
 user
   pk *String
 
@@ -21,3 +22,7 @@ password
 note
   pk *String  # userId
   sk **String # noteId
+
+todo
+  pk *String # userId
+  sk **String # todoId
