@@ -13,16 +13,6 @@ region ap-southeast-2
 
 @tables
 
-user
+app
   pk *String
-
-password
-  pk *String # userId
-
-note
-  pk *String  # userId
-  sk **String # noteId
-
-todo
-  pk *String # userId
-  sk **String # todoId
+  sk **String

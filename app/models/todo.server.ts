@@ -25,7 +25,7 @@ export async function getTodo({
 }: Pick<Todo, "id" | "userId">): Promise<Todo | null> {
     const db = await arc.tables();
 
-    const result = await await db.todo.get({ pk: userId, sk: idToSk(id) });
+    const result = await await db.app.get({ pk: userId, sk: idToSk(id) });
     
     if (!result) {
         return null
@@ -40,6 +40,26 @@ export async function getTodo({
     }
 }
 
+
+export async function getTodoListItems({
+    userId,
+  }: Pick<Todo, "userId">): Promise<Array<Pick<Todo, "id" | "title">>> {
+    const db = await arc.tables();
+  
+    const result = await db.app.query({
+      KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+      ExpressionAttributeValues: {
+        ":pk": userId,
+        ":sk": 'todo#',
+      },
+    });
+  
+    return result.Items.map((n: any) => ({
+      title: n.title,
+      id: skToId(n.sk),
+    }));
+  }
+
 export async function createTodo({
     userId,
     title,
@@ -48,7 +68,7 @@ export async function createTodo({
 }: Pick<Todo, "userId" | "title" | "description" | "isComplete">): Promise<Todo> {
     const db = await arc.tables()
   
-    const result = await db.todo.put({
+    const result = await db.app.put({
         pk: userId,
         sk: idToSk(cuid()),
         title,
