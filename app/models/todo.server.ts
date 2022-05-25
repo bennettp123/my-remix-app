@@ -83,5 +83,39 @@ export async function createTodo({
         description: result.description,
         isComplete: result.isComplete,
     };
+}
+
+export async function setTodoCompletion({
+    id,
+    userId,
+    isComplete,
+}: Pick<Todo, 'id' | 'userId' | 'isComplete'>): Promise<Todo | null> {
+    const db = await arc.tables()
+    const todo = await getTodo({id, userId})
+
+    if (!todo) {
+        return null
+    }
+
+    const result = await db.app.update({
+        pk: userId,
+        sk: idToSk(id),
+        title: todo.title,
+        description: todo.description,
+        isComplete,
+    })
+
+    return {
+        id: skToId(result.sk),
+        userId: result.pk,
+        title: result.title,
+        description: result.description,
+        isComplete: result.isComplete,
+    }
+}
+
+export async function deleteTodo({ id, userId }: Pick<Todo, "id" | "userId">) {
+    const db = await arc.tables();
+    return db.app.delete({ pk: userId, sk: idToSk(id) });
   }
   
