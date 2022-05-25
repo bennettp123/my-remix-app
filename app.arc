@@ -12,12 +12,6 @@ region ap-southeast-2
 @static
 
 @tables
-user
+app
   pk *String
-
-password
-  pk *String # userId
-
-note
-  pk *String  # userId
-  sk **String # noteId
+  sk **String
