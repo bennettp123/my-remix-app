@@ -2,14 +2,24 @@ import arc from "@architect/functions";
 import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
 
-export type User = { id: `email#${string}`; email: string };
-export type Password = { password: string };
+export type User = {
+  id: `email#${string}`
+  email: string
+}
+
+export type Password = {
+  id: `email#${string}`
+  password: string,
+}
 
 export async function getUserById(id: User["id"]): Promise<User | null> {
   const db = await arc.tables();
-  const result = await db.user.query({
-    KeyConditionExpression: "pk = :pk",
-    ExpressionAttributeValues: { ":pk": id },
+  const result = await db.app.query({
+    KeyConditionExpression: "pk = :pk and sk = :sk",
+    ExpressionAttributeValues: {
+      ":pk": id,
+      ":sk": 'email',
+    },
   });
 
   const [record] = result.Items;
@@ -21,11 +31,14 @@ export async function getUserByEmail(email: User["email"]) {
   return getUserById(`email#${email}`);
 }
 
-async function getUserPasswordByEmail(email: User["email"]) {
+async function getPasswordByEmail(email: User["email"]) {
   const db = await arc.tables();
-  const result = await db.password.query({
-    KeyConditionExpression: "pk = :pk",
-    ExpressionAttributeValues: { ":pk": `email#${email}` },
+  const result = await db.app.query({
+    KeyConditionExpression: "pk = :pk and sk = :sk",
+    ExpressionAttributeValues: {
+      ":pk": `email#${email}`,
+      ":sk": 'password',
+    },
   });
 
   const [record] = result.Items;
@@ -40,13 +53,15 @@ export async function createUser(
 ) {
   const hashedPassword = await bcrypt.hash(password, 10);
   const db = await arc.tables();
-  await db.password.put({
+  await db.app.put({
     pk: `email#${email}`,
+    sk: 'password',
     password: hashedPassword,
   });
 
-  await db.user.put({
+  await db.app.put({
     pk: `email#${email}`,
+    sk: 'email',
     email,
   });
 
@@ -58,15 +73,21 @@ export async function createUser(
 
 export async function deleteUser(email: User["email"]) {
   const db = await arc.tables();
-  await db.password.delete({ pk: `email#${email}` });
-  await db.user.delete({ pk: `email#${email}` });
+  await db.app.delete({
+    pk: `email#${email}`,
+    sk: 'password',
+  });
+  await db.app.delete({
+    pk: `email#${email}`,
+    sk: 'email',
+  });
 }
 
 export async function verifyLogin(
   email: User["email"],
   password: Password["password"]
 ) {
-  const userPassword = await getUserPasswordByEmail(email);
+  const userPassword = await getPasswordByEmail(email);
 
   if (!userPassword) {
     return undefined;
