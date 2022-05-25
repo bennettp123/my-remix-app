@@ -29,12 +29,21 @@ export default function Index() {
               </p>
               <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                 {user ? (
-                  <Link
-                    to="/notes"
+                  <div>
+                    <Link
+                      to="/notes"
+                      className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-red-700 shadow-sm hover:bg-red-50 sm:px-8"
+                    >
+                      View Notes for {user.email}
+                    </Link>
+                    <p></p>
+                    <Link
+                    to="/todos"
                     className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-red-700 shadow-sm hover:bg-red-50 sm:px-8"
                   >
-                    View Notes for {user.email}
+                    View Todos for {user.email}
                   </Link>
+                </div>
                 ) : (
                   <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">
                     <Link
